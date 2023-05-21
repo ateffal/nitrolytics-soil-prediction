@@ -30,12 +30,12 @@ st.dataframe(water_recharge_df, 10000, 500)
 
 
 var_target = st.selectbox(
-    "Select target variable : ", cols)
+    "Select target variable : ", cols, 2)
 
 
 options = st.multiselect(
     "Select feature variables : ",
-    cols, cols[0])
+    cols, cols[3:4])
 
 
 var_time = st.selectbox(
