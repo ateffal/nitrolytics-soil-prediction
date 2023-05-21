@@ -35,7 +35,7 @@ var_target = st.selectbox(
 
 options = st.multiselect(
     "Select feature variables : ",
-    cols, cols[3:4])
+    cols, cols[3:5])
 
 
 var_time = st.selectbox(
