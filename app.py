@@ -6,127 +6,123 @@ import altair as alt
 import helpers as h
 import compare_models as cm
 
+# read data
+water_recharge_df = pd.read_csv('data/water_recharge_data.csv')
 
-prices_terror_attacks = pd.read_excel(
-    'data/wfp_food_prices_pakistan_restructured.xlsx', sheet_name='wfp_food_prices_cmname')
-prices_terror_attacks = prices_terror_attacks.dropna()
-# prices_terror_attacks
-
-crimes = pd.read_excel(
-    'data/year_wise_crime_report_v20221114.xlsx', sheet_name='monthly_calculated')
-
-data = prices_terror_attacks.set_index('date').join(
-    crimes[['date', 'monthly_crimes_calculated_with_noise']].set_index('date'), how='left').reset_index()
-data = data.sort_values(['cmname_mktname', 'date'])
-
-# prediction_nnet(cmname, mktname, features, target, n_obs = None, lags = 6)
-cmnames = list(data.cmname.unique())
-mktnames = list(data.mktname.unique())
-
-cols = ['price', 'price_var', 'crimes_annual_percent_change', 'crimes_per_100K_population',
-        'terror_attacks_casualties', 'monthly_crimes_calculated_with_noise']
-
-crimes_cols = ['terror_attacks_casualties',
-               'crimes_per_100K_population',
-               'crimes_annual_percent_change',
-               'monthly_crimes_calculated_with_noise']
-
-
-# image = Image.open('pakistan-flag.JPG')
-# st.image(image, use_column_width=True)
+# store columns
+cols = list(water_recharge_df.columns)
 
 st.write(
     """
-    # Dashboard Building For Growing Inflation in Pakistan
+    # Predicting Soil Characteristic
     ***
     """
-
-
 )
+
+st.write(
+    """
+    ### Sample data only - Will be linked to mvp-2 ( this data will be the one of the ROI selected )
+    ***
+    """
+)
+
+st.dataframe(water_recharge_df, 10000, 500)
+
+
+var_target = st.selectbox(
+    "Select target variable : ", cols)
 
 
 options = st.multiselect(
-    "Select variables to use for predicting crimes : ",
+    "Select feature variables : ",
     cols, cols[0])
 
-# for k in options:
-#     st.write('You selected:', options[k])
 
-var_target = st.selectbox(
-    "Select target varibale for crimes levels : ",
-    crimes_cols)
+var_time = st.selectbox(
+    "Select datetime variable - not used for now: ", cols)
 
-st.sidebar.header('Choose a comodity')
+st.sidebar.header('Choose a region - Not used for now')
 
-comodity = st.sidebar.selectbox(
-    'Choose a comodity', cmnames)
+continent = st.sidebar.selectbox(
+    'Choose a continent', ['America', 'Europe', 'Africa', 'Asia', 'Austria'])
 
 
-st.sidebar.header('Choose a market')
+st.sidebar.header('Choose a city - Not used for now')
 
 market = st.sidebar.selectbox(
-    'Choose a market', mktnames)
-
-choosen_model = st.sidebar.multiselect(
-    'Compare models :', ['NNET', 'RNN', 'LSTM'], ['NNET', 'RNN'])
+    'Choose a city', ['city 1', 'city 2'])
 
 
-# selected_data = h.select_data(data, comodity, market)
+# choosen_model = st.sidebar.multiselect(
+#     'Compare models :', ['NNET', 'RNN', 'LSTM'], ['NNET', 'RNN'])
 
-sugar_quetta_data = h.select_data(data, comodity, market)
 
-# ['price', 'monthly_crimes_calculated_with_noise']
 if not (var_target in options):
-    vars_features = options + [var_target]  # ['price'] + [var_target]
+    vars_features = options + [var_target]
 else:
     vars_features = options
-# var_target = 'crimes_per_100K_population'
 
 
-selected_data, predictions, RMSE = h.prediction_nnet_dense_layers(sugar_quetta_data,
-                                                                  features=vars_features,
-                                                                  target=var_target,
-                                                                  lags=6,
-                                                                  scale_data=True)
-st.write(
-    """
-    # Predictions
-    ***
-    """ + var_target
-)
+selected_data = water_recharge_df[[var_time] + vars_features]
+
+# st.write(
+#     """
+#     # Selected data :
+#     ***
+#     """
+# )
+
+st.write(" Target variable : " + var_target +
+         ' -- features : ' + str(vars_features))
 
 
-st.line_chart(predictions[[predictions.columns[0], predictions.columns[1]]])
-
-st.dataframe(predictions)
+# st.dataframe(selected_data, 10000, 500)
 
 
-st.write(
-    """
-    # Selected data : 
-    ***
-    """
-)
+if st.button('Predict'):
+    selected_data, predictions, RMSE = h.prediction_nnet_dense_layers(selected_data,
+                                                                      features=vars_features,
+                                                                      target=var_target,
+                                                                      lags=6,
+                                                                      scale_data=True)
+    st.write(
+        """
+        # Predictions  
+        Sequential Neural Network with three hidden layers : 32 nodes, 32 nodes, 32 nodes \n
+        6 lags of the target variable
+        """ + var_target
+    )
 
-st.write('Comodity : ' + comodity, ' --- ' + market +
-         '--- ' + str(len(selected_data)) + ' records')
+    st.line_chart(
+        predictions[[predictions.columns[0], predictions.columns[1]]])
 
-st.dataframe(selected_data, 10000, 500)
+    st.dataframe(predictions)
+
+    st.write('Root Mean Squared Error : ' + str(RMSE))
 
 
-st.write(
-    """
-    # Compare models by splitting data into train, validation and test : 
-    ***
-    """
-)
+else:
+    st.write('Click Predict to run model')
 
-predictions_2, rmses = cm.compare_models(sugar_quetta_data, 
-                                                vars_features, var_target, choosen_model)
 
-st.line_chart(predictions_2)
+# if st.button('Compare models'):
 
-for m in choosen_model:
-    st.text('Root Mean Squared Error of ' + m + ' : ' + str(rmses[m]))
+#     st.write(
+#         """
+#         # Compare models by splitting data into train, validation and test :
+#         ***
+#         """
+#     )
 
-st.dataframe(predictions_2)
+#     predictions_2, rmses = cm.compare_models(selected_data,
+#                                              vars_features, var_target, choosen_model)
+
+#     st.line_chart(predictions_2)
+
+#     for m in choosen_model:
+#         st.text('Root Mean Squared Error of ' + m + ' : ' + str(rmses[m]))
+
+#     st.dataframe(predictions_2)
+# else:
+#     st.write(
+#         'Click Compare models to run the other models and compare - comparaison using test data')
