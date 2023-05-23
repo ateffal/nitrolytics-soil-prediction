@@ -53,8 +53,8 @@ market = st.sidebar.selectbox(
     'Choose a city', ['city 1', 'city 2'])
 
 
-# choosen_model = st.sidebar.multiselect(
-#     'Compare models :', ['NNET', 'RNN', 'LSTM'], ['NNET', 'RNN'])
+choosen_model = st.sidebar.multiselect(
+    'Compare models :', ['NNET', 'RNN', 'LSTM'], ['NNET', 'RNN'])
 
 
 if not (var_target in options):
@@ -105,24 +105,24 @@ else:
     st.write('Click Predict to run model')
 
 
-# if st.button('Compare models'):
+if st.button('Compare models'):
 
-#     st.write(
-#         """
-#         # Compare models by splitting data into train, validation and test :
-#         ***
-#         """
-#     )
+    st.write(
+        """
+        # Compare models by splitting data into train, validation and test :
+        ***
+        """
+    )
 
-#     predictions_2, rmses = cm.compare_models(selected_data,
-#                                              vars_features, var_target, choosen_model)
+    predictions_2, rmses = cm.compare_models(selected_data,
+                                             vars_features, var_target, choosen_model)
 
-#     st.line_chart(predictions_2)
+    st.line_chart(predictions_2)
 
-#     for m in choosen_model:
-#         st.text('Root Mean Squared Error of ' + m + ' : ' + str(rmses[m]))
+    for m in choosen_model:
+        st.text('Root Mean Squared Error of ' + m + ' : ' + str(rmses[m]))
 
-#     st.dataframe(predictions_2)
-# else:
-#     st.write(
-#         'Click Compare models to run the other models and compare - comparaison using test data')
+    st.dataframe(predictions_2)
+else:
+    st.write(
+        'Click Compare models to run the other models and compare - comparaison using test data')
