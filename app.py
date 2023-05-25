@@ -114,15 +114,32 @@ if st.button('Compare models'):
         """
     )
 
-    predictions_2, rmses = cm.compare_models(selected_data,
+    pred_train,pred_val, pred_test, models = cm.compare_models(selected_data,
                                              vars_features, var_target, choosen_model)
 
-    st.line_chart(predictions_2)
+    st.line_chart(pred_train[0])
 
+    st.text('Train data :')
     for m in choosen_model:
-        st.text('Root Mean Squared Error of ' + m + ' : ' + str(rmses[m]))
+        st.text('Root Mean Squared Error of ' + m + ' : ' + str(pred_train[1][m]))
 
-    st.dataframe(predictions_2)
+    st.text('Validation data :')
+    for m in choosen_model:
+        st.text('Root Mean Squared Error of ' + m + ' : ' + str(pred_val[1][m]))
+
+    st.text('Test data :')
+    for m in choosen_model:
+        st.text('Root Mean Squared Error of ' + m + ' : ' + str(pred_test[1][m]))
+
+    st.text('Predictions for train data :')
+    st.dataframe(pred_train[0])
+
+    st.text('Predictions for validation data :')
+    st.dataframe(pred_val[0])
+
+    st.text('Predictions for test data :')
+    st.dataframe(pred_test[0])
+
 else:
     st.write(
         'Click Compare models to run the other models and compare - comparaison using test data')
